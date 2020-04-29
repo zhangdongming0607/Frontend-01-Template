@@ -16,3 +16,7 @@ const HexIntegerLiteral = /^0([x|X])([0-9a-fA-F])+$/ // 0 -> false 0x -> false 0
 // final
 const NumericLiteral = /(^(((0|([1-9]\d*))\.\d+?)|(\.\d+)|(0|([1-9]\d*)))([E|e][+|-]?\d+)?$)|(^0([B|b])([0|1])+$)|(^0([o|O])([0-7])+$)/
 
+module.exports = {
+  NumericLiteral,
+  DecimalLiteral
+}
