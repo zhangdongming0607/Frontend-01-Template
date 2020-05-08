@@ -60,6 +60,7 @@ e.g.
 * -a
 * ~a
 * await a
+* !a
 ### exponential
 * `**`
 ### multiplicative

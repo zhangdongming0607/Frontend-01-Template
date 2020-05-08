@@ -1,1 +1,12 @@
-# 每周总结可以写在这里
+#
+## microtask macrotask
+### macrotask
+IO
+setTimeout/setInterval
+setImmediate
+RAF
+
+### microtask
+Promise.nextTick
+MutationObserver
+Promise.then
