@@ -234,7 +234,7 @@ class Response {}
 
   let response = await request.send();
   // 如果用 body 是数组，传出来的是引用，尽管 resolve 的时候是 ['o', 'k']，
-  // 但是因为后来变成了 ['o', 'k', '\r', '\n']（状态机在 isFinished = true 之后还在跑，\r\n 被错误地当做是 body 了）
+  // 但是因为后来 this.body 变成了 ['o', 'k', '\r', '\n']（状态机在 isFinished = true 之后还在跑，\r\n 被错误地当做是 body 了）
   // 导致 console 的是最新的数据
   // fix: 1. 让状态机读完 2. 传值类型 3. body 拷贝
   console.log(response)
