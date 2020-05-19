@@ -1,4 +1,5 @@
 const net = require("net");
+const parseHTML = require('./parser')
 
 class Request {
   // method, url = host + port + path
@@ -225,7 +226,7 @@ class Response {}
 (async function () {
   const request = new Request({
     host: "127.0.0.1",
-    port: 8088,
+    port: 8089,
     path: "/",
     body: {
       name: "winter",
@@ -238,4 +239,5 @@ class Response {}
   // 导致 console 的是最新的数据
   // fix: 1. 让状态机读完 2. 传值类型 3. body 拷贝
   console.log(response)
+  // let html = parseHTML(response)
 })();

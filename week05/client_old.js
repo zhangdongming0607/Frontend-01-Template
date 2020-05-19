@@ -97,7 +97,7 @@ class ChunkedBodyParser {
         }
         this.current = this.WAITING_LENGTH_LINE_END
       } else {
-        this.length *=10
+        this.length *=16 // 16 进制
         this.length += char.charCodeAt(0) - '0'.charCodeAt(0)
       }
     }
