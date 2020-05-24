@@ -3,11 +3,14 @@
 const html = `<html maaa=a >
 <head>
     <style>
+body div img1 {
+  width: 200px;
+}    
 body div #myid{
     width:100px;
     background-color: #ff5000;
 }
-body div img{
+body div .img2 {
     width:30px;
     background-color: #ff1111;
 }
@@ -15,19 +18,22 @@ body div img{
 </head>
 <body>
     <div>
-        <img id="myid"/>
-        <img />
+        <img class="img1" id="myid"/>
+        <img class="img2" />
     </div>
 </body>
 </html>`;
 
 const EOF = Symbol("EOF");
+const {addCssRules, cssComputing} = require('./cssComputing')
 
 let currentToken = null; // type(text|openTag|endTag|selfClosingTag) tagName? value?
 let currentAttribute = null; // name value
+let currentTextNode = null
 
 const root = { type: "document", children: [] };
 let stack = [{ type: "document", children: [] }];
+const rules = []
 
 function emit(token) {
   let top = stack[stack.length - 1] || root;
@@ -44,62 +50,68 @@ function emit(token) {
       })),
     };
     top.children.push(element);
+    cssComputing(element, rules, stack)
     element.parent = top;
     if (!token.selfClosing) {
       stack.push(element);
     }
+    currentTextNode = null
   }
   if (token.type === "endTag") {
     if (top.tagName !== token.tagName) {
       throw new Error("tag start end doesn't match!");
+    } else {
+      if(token.tagName === 'style') {
+        addCssRules(currentTextNode.content, rules)
+      }
     }
     stack.pop();
   }
-  // stack.push(token)
-  // if (token.type !== "text") {
-  //   console.log(token);
-  // }
+  if (token.type === "text") {
+    if(currentTextNode === null) {
+      currentTextNode = {
+        type: 'text',
+        content: ''
+      }
+      top.children.push(currentTextNode)
+    }
+    currentTextNode.content += token.content
+  }
 }
 
 // 等数据
 function data(c) {
   if (c === "<") {
-    // // 我不确定这么实现好不好
-    // if(currentToken && currentToken.type === 'text') {
-    //   emit(currentToken)
-    // }
     return tagOpenState;
   }
-  currentToken && currentToken.value
-    ? (currentToken.value += c)
-    : (currentToken = {
-        type: "text",
-        value: c,
-      });
+  emit(currentToken = {
+    type: "text",
+    content: c,
+  })
+
   return data;
 }
 function tagOpenState(c) {
   if (c === "/") {
     return endTagOpenState;
   }
+  
+  if(/^[a-zA-Z]$/.test(c)) {
+    currentToken = {
+      type: "startTag",
+      tagName: c,
+      attributes: {},
+    };
+  
+    return tagNameState;
+  }
 
-  currentToken = {
-    type: "startTag",
-    tagName: c,
-    attributes: {},
-  };
-
-  return tagNameState;
 }
 function endTagOpenState(c) {
-  if (c === "/") {
-    return endTagOpenState;
-  }
   currentToken = {
     type: "endTag",
     tagName: c,
   };
-
   return tagNameState;
 }
 function tagNameState(c) {
@@ -231,7 +243,12 @@ function parseHTML(str) {
 }
 
 parseHTML(html)
-console.log(stack[0])
+
+debugger
+
+module.exports = {
+  domTree: stack[0]
+}
 
 // module.exports = {
 //   parseHTML
