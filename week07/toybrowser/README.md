@@ -1,3 +1,5 @@
+### 流程
+
 order
 
 默认值处理：
@@ -51,10 +53,6 @@ getStyle
 * Align-content 的行为
 * align- items 的行为
 
-
-
-
-
 itemStyle
 
 mainSize mainStart mainEnd
@@ -63,7 +61,7 @@ crossSize crossStart crossEnd
 
 
 
-问题：
+### 问题：
 
 1. style.flexWrap === 'nowrap' || isAutoMainSize 那里应该是 && 吧
 2. 文档上说 alignItems 和 justifyContent 的默认值是 normal，为什么代码里用 stretch
