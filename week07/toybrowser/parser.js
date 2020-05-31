@@ -3,29 +3,38 @@
 const html = `<html maaa=a >
 <head>
     <style>
-body div img1 {
+div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  width: 400px;
+}
+
+div .span1 {
   width: 200px;
 }    
-body div #myid{
+div .span2 { 
     width:100px;
-    background-color: #ff5000;
+    background-color: red;
+    flex: 1;
 }
-body div .img2 {
-    width:30px;
-    background-color: #ff1111;
+div span {
+    height: 30px;
 }
     </style>
 </head>
 <body>
     <div>
-        <img class="img1" id="myid"/>
-        <img class="img2" />
+        <span class="span1"></span>
+        <span class="span2"></span>
     </div>
 </body>
 </html>`;
 
 const EOF = Symbol("EOF");
 const {addCssRules, cssComputing} = require('./cssComputing')
+const {layout} = require('./layout')
 
 let currentToken = null; // type(text|openTag|endTag|selfClosingTag) tagName? value?
 let currentAttribute = null; // name value
@@ -65,6 +74,8 @@ function emit(token) {
         addCssRules(currentTextNode.content, rules)
       }
     }
+    // question4
+    layout(stack[stack.length - 1])
     stack.pop();
   }
   if (token.type === "text") {
@@ -244,6 +255,7 @@ function parseHTML(str) {
 
 parseHTML(html)
 
+console.log(stack[0])
 
 module.exports = {
   domTree: stack[0]

@@ -1,0 +1,10 @@
+{
+  "name": "week06",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "css": "^2.2.4",
+    "humps": "^2.0.1"
+  }
+}
