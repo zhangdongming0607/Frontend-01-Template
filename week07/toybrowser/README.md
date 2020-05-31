@@ -65,7 +65,7 @@ crossSize crossStart crossEnd
 
 问题：
 
-1.  style.flexWrap === 'nowrap' || isAutoMainSize 那里应该是 && 吧
+1. style.flexWrap === 'nowrap' || isAutoMainSize 那里应该是 && 吧
 2. 文档上说 alignItems 和 justifyContent 的默认值是 normal，为什么代码里用 stretch
 3. 算 mainBase 的时候用了 style.width 和 sytle.height，但是给 isAutoMainSize 的组件补 mainSize 默认值是在那之后？
 4. 没太明白为啥 layout 调用是在 tagStart 的地方，如果在这的话，应该 element 子元素还没有 push 进去？

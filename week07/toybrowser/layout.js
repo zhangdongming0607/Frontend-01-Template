@@ -3,6 +3,7 @@ const {
   getAbstractProperties,
   defaultFlexValues,
 } = require("./getAbstractProperties");
+const { nullishOperate } = require("./utils");
 
 const getStyle = (element) => {
   if (!element.style) {
@@ -20,10 +21,16 @@ const getStyle = (element) => {
 
 const layout = (element) => {
   getStyle(element);
-  if (element.computedStyle?.display?.value !== "flex") return;
+  if (
+    element.computedStyle &&
+    element.computedStyle.display &&
+    element.computedStyle.display.value !== "flex"
+  )
+    return;
   let style = element.style;
   if (!element || element.type !== "element") return;
   if (!element.computedStyle) return;
+  if (element.style.display !== 'flex') return
   // 用来做 render 的实际值
   let elementStyle = { ...element.style };
   // style.order 处理
@@ -65,7 +72,8 @@ const layout = (element) => {
     // style[abstractProperties.mainSize] = items.reduce()
     isAutoMainSize = true;
     elementStyle[mainSize] = items.reduce(
-      (prevVal, curItem) => prevVal + curItem.style[mainSize] ?? 0,
+      (prevVal, curItem) =>
+        prevVal + nullishOperate(curItem.style[mainSize], 0),
       0
     );
     isAutoMainSize = true;
@@ -108,7 +116,10 @@ const layout = (element) => {
       mainSpace -= itemStyle[mainSize];
     }
     // question5
-    crossSpace = Math.max(crossSpace, item.itemStyle[crossSize] ?? 0);
+    crossSpace = Math.max(
+      crossSpace,
+      nullishOperate(item.itemStyle[crossSize], 0)
+    );
   });
   // 处理可能存在的没有排完的最后一行
   flexLine.mainSpace = mainSpace;
@@ -249,37 +260,46 @@ const layout = (element) => {
     const lineCrossSpace =
       elementStyle.alignContent === "stretch"
         ? crossSpace / flexLines.length + flexLine.crossSpace
-        : flexLine.crossSpace;    
-    flexLine.forEach(item => {
-      const {itemStyle} = item
-      const align = itemStyle.alignSelf || elementStyle.alignItems || 'stretch'
-      if(!itemStyle[crossSize]) {
-        if(align === 'stretch') {
-          itemStyle[crossSize] = lineCrossSpace
+        : flexLine.crossSpace;
+    flexLine.forEach((item) => {
+      const { itemStyle } = item;
+      const align = itemStyle.alignSelf || elementStyle.alignItems || "stretch";
+      if (!itemStyle[crossSize]) {
+        if (align === "stretch") {
+          itemStyle[crossSize] = lineCrossSpace;
         } else {
-          itemStyle[crossSize] = 0
+          itemStyle[crossSize] = 0;
         }
       }
-      if(align === 'flex-start') {
-        itemStyle[crossStart] = currentCross
-        itemStyle[crossEnd] = itemStyle[crossStart] + crossSign * itemStyle[crossSize]
+      if (align === "flex-start") {
+        itemStyle[crossStart] = currentCross;
+        itemStyle[crossEnd] =
+          itemStyle[crossStart] + crossSign * itemStyle[crossSize];
       }
-      if(align === 'flex-end') {
-        itemStyle[crossEnd] = currentCross + crossSign * crossSpace
-        itemStyle[crossStart] = itemStyle[crossEnd] + crossSign * itemStyle[crossSize]
+      if (align === "flex-end") {
+        itemStyle[crossEnd] = currentCross + crossSign * crossSpace;
+        itemStyle[crossStart] =
+          itemStyle[crossEnd] + crossSign * itemStyle[crossSize];
       }
-      if(align === 'center') {
-        itemStyle[crossStart] = currentCross + (lineCrossSpace - itemStyle[crossSize]) / 2 * crossSign
-        itemStyle[crossEnd] = itemStyle[crossStart] + itemStyle[crossSize] * crossSign
+      if (align === "center") {
+        itemStyle[crossStart] =
+          currentCross +
+          ((lineCrossSpace - itemStyle[crossSize]) / 2) * crossSign;
+        itemStyle[crossEnd] =
+          itemStyle[crossStart] + itemStyle[crossSize] * crossSign;
       }
-      if(align === 'stretch') {
-        itemStyle[crossStart] = currentCross
-        itemStyle[crossSize] = itemStyle[crossSize] ?? lineCrossSpace
-        itemStyle[crossEnd] = itemStyle[crossStart] + itemStyle[crossSize] * crossSign
+      if (align === "stretch") {
+        itemStyle[crossStart] = currentCross;
+        itemStyle[crossSize] = nullishOperate(
+          itemStyle[crossSize],
+          lineCrossSpace
+        );
+        itemStyle[crossEnd] =
+          itemStyle[crossStart] + itemStyle[crossSize] * crossSign;
       }
 
-      currentCross += crossSign + crossSign * lineCrossSpace
-    })
+      currentCross += crossSign + crossSign * lineCrossSpace;
+    });
   });
 };
 

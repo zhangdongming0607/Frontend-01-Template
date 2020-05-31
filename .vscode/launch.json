@@ -11,7 +11,8 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/week07/toybrowser/parser.js"
+            "program": "${workspaceFolder}/week07/toybrowser/parser.js",
+            "runtimeVersion": "10.20.1"
         }
     ]
 }

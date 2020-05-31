@@ -16,10 +16,13 @@ div .span1 {
 }    
 div .span2 { 
     width:100px;
-    background-color: red;
+    background-color: rgb(255,0,0);
     flex: 1;
+    height: 20px;
 }
 div span {
+    background-color: rgb(0,255,0);
+    width: 40px
     height: 30px;
 }
     </style>
@@ -35,6 +38,7 @@ div span {
 const EOF = Symbol("EOF");
 const {addCssRules, cssComputing} = require('./cssComputing')
 const {layout} = require('./layout')
+const {render, createViewPort} = require('./render')
 
 let currentToken = null; // type(text|openTag|endTag|selfClosingTag) tagName? value?
 let currentAttribute = null; // name value
@@ -254,8 +258,9 @@ function parseHTML(str) {
 }
 
 parseHTML(html)
-
-console.log(stack[0])
+const viewport = createViewPort(800, 600)
+render(viewport, stack[0])
+viewport.save('viewport.jpg')
 
 module.exports = {
   domTree: stack[0]

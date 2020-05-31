@@ -1,4 +1,5 @@
 const css = require("css");
+const {nullishOperate} = require('./utils')
 
 const addCssRules = (text, rules) => {
   const ast = css.parse(text);
@@ -50,7 +51,7 @@ const specificity = (selector) => {
   }
   //todo: 处理子孙之外的优先级
   return selctorEles.reduce((prev, cur) => {
-    const key = positionMap[cur[0]] ?? 2
+    const key =  nullishOperate(positionMap[cur[0]], 2)
     const newArr = prev.slice()
     newArr[key]++
     return newArr
