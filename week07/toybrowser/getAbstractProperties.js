@@ -55,7 +55,7 @@ const getAbstractProperties = (style) => {
   if (flexDirection === "row-reverse") {
     mainSize = "width";
     mainStart = "right";
-    mainEnd = "bottom";
+    mainEnd = "left";
     mainSign = -1;
     // question3
     mainBase = ELEMENT_WIDTH;
@@ -117,5 +117,6 @@ const getAbstractProperties = (style) => {
 module.exports = {
   getAbstractProperties,
   ELEMENT_WIDTH,
+  ELEMENT_HEIGHT,
   defaultFlexValues
 };

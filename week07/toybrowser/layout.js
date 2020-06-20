@@ -2,6 +2,8 @@ const { camelizeKeys } = require("humps");
 const {
   getAbstractProperties,
   defaultFlexValues,
+  ELEMENT_HEIGHT,
+  ELEMENT_WIDTH,
 } = require("./getAbstractProperties");
 const { nullishOperate } = require("./utils");
 
@@ -30,14 +32,15 @@ const layout = (element) => {
   let style = element.style;
   if (!element || element.type !== "element") return;
   if (!element.computedStyle) return;
-  if (element.style.display !== 'flex') return
+  if (element.style.display !== "flex") return;
   // 用来做 render 的实际值
-  let elementStyle = { ...element.style };
+  let elementStyle = { ...camelizeKeys(element.style) };
   // style.order 处理
   const items = [...element.children]
     .filter((e) => e.type === "element")
     .sort((a, b) => (a.order || 0) - (b.order || 0));
   // 给默认值
+  style = camelizeKeys(style);
   style = Object.keys(style).reduce((prev, k) => {
     // width 和 height auto 值处理
     if (["width", "height"].includes(k) && ["auto", ""].includes(style[k])) {
@@ -53,7 +56,7 @@ const layout = (element) => {
   const abstractProperties = getAbstractProperties(style);
 
   elementStyle = { ...elementStyle, ...abstractProperties };
-  const {
+  let {
     mainSize,
     mainStart,
     mainEnd,
@@ -78,22 +81,29 @@ const layout = (element) => {
     );
     isAutoMainSize = true;
   }
+  // 补上之前不定的 mainBase 值
+  if ([ELEMENT_HEIGHT, ELEMENT_WIDTH].includes(mainBase)) {
+    mainBase = elementStyle[mainSize];
+    elementStyle[mainBase] = mainBase;
+    abstractProperties[mainBase] = mainBase;
+  }
   const flexLine = [];
   const flexLines = [flexLine];
-  let mainSpace = elementStyle[mainSize];
+  flexLine.mainSpace = elementStyle[mainSize];
   let crossSpace = 0;
   items.forEach((item) => {
     getStyle(item);
     // 子元素的实际样式
     const itemStyle = { ...item.style };
     item.itemStyle = itemStyle;
+    // 补上之前不定的 mainBase 值
     if (itemStyle.flex) {
       // 带 flex 属性的元素随便伸缩
       flexLine.push(item);
       // question1
     } else if (isAutoMainSize || elementStyle.flexWrap === "nowrap") {
       // 一定不会换行
-      mainSpace -= item.itemStyle[mainSize];
+      flexLine.mainSpace -= item.itemStyle[mainSize];
       flexLine.push(item);
     } else {
       // 无论如何，item 的 mainSize 不会超过 element 的
@@ -102,18 +112,18 @@ const layout = (element) => {
         elementStyle[mainSize]
       );
       // 正常换行的 flex 流，且容器内容均规定了 mainSize 值
-      if (mainSpace < itemStyle[mainSize]) {
+      if (flexLine.mainSpace < itemStyle[mainSize]) {
         // 当前剩余 mainSpace 不足以放当前 item，结算当前 flexLine 信息并换行
         flexLine.crossSpace = crossSpace;
         flexLine = [item];
         flexLines.push(flexLine);
-        mainSpace = computedStyle[mainSize];
+        flexLine.mainSpace = computedStyle[mainSize];
         crossSpace = 0;
       } else {
         // 当前行足够放
         flexLine.push(item);
       }
-      mainSpace -= itemStyle[mainSize];
+      flexLine.mainSpace -= itemStyle[mainSize];
     }
     // question5
     crossSpace = Math.max(
@@ -122,15 +132,12 @@ const layout = (element) => {
     );
   });
   // 处理可能存在的没有排完的最后一行
-  flexLine.mainSpace = mainSpace;
-  // 这个只是内容决定的 crossSpace，并没有考虑剩余空间
-  flexLine.crossSpace = crossSpace;
   // question6
   if (!flexLines.includes(flexLine)) {
     flexLines.push(flexLine);
   }
   // 开始处理伸缩，空白问题
-  if (mainSpace < 0) {
+  if (flexLines[0].mainSpace < 0) {
     //压缩，只有单行可能出现这种情况
     const scale =
       elementStyle[mainSpace] / (elementStyle[mainSpace] - mainSpace);
@@ -148,6 +155,7 @@ const layout = (element) => {
   } else {
     // 有剩余空间
     flexLines.forEach((flexLine) => {
+      const { mainSpace } = flexLine;
       const flexItemCount = flexLine.reduce(
         (prevCount, item) => (item.itemStyle.flex ? prevCount + 1 : prevCount),
         0
@@ -180,7 +188,7 @@ const layout = (element) => {
           step = 0;
         }
         if (justifyContent === "center") {
-          currentMain = mainSpace / 2 + mainBase;
+          currentMain = (mainSpace / 2) * mainSign + mainBase;
           step = 0;
         }
         if (justifyContent === "space-between") {
@@ -192,12 +200,11 @@ const layout = (element) => {
           step = (mainSpace / flexLine.length) * mainSign;
           currentMain = mainBase + step / 2;
         }
-
         flexLine.forEach((item) => {
           const { itemStyle } = item;
           // question7
           itemStyle[mainStart] = currentMain;
-          itemStyle[mainEnd] = currentMain + itemStyle[mainSize] * mainSize;
+          itemStyle[mainEnd] = currentMain + itemStyle[mainSize] * mainSign;
           currentMain = itemStyle[mainEnd] + step;
         });
       }
