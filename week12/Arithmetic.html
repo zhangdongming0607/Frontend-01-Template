@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head></head>
+  <body></body>
+  <script>
+    const regExp = /([0-9\.]+)|([ ]+)|([\r\n]+)|(\+)|(\-)|(\*)|(\/)/g;
+    const dictionary = [
+      "number",
+      "whitespace",
+      "LineTerminator",
+      "+",
+      "-",
+      "*",
+      "/",
+    ];
+    // tokenize
+    function* tokenize(source) {
+      let result = null;
+      let lastIndex = 0;
+
+      while (1) {
+        lastIndex = regExp.lastIndex;
+        result = regExp.exec(source);
+        if (!result) break;
+        if (regExp.lastIndex - lastIndex > result[0].length) {
+          throw new Error(
+            `Unexpected token: ${source.slice(
+              lastIndex,
+              regExp.lastIndex - result[0].length
+            )}`
+          );
+        }
+
+        const token = {
+          type: null,
+          token: null,
+        };
+
+        for (let i = 0; i < dictionary.length; i++) {
+          if (result[i + 1]) token.type = dictionary[i];
+        }
+
+        token.value = result[0];
+        yield token;
+      }
+
+      yield { type: "EOF" };
+    }
+
+    let source = [];
+
+    for (let token of tokenize("1024+1222")) {
+      if (token.type !== "whitespace") {
+        source.push(token);
+      }
+    }
+
+
+    const multiplicativeExpression = (source) => {
+        if(source[0].type === 'number') {
+            let node = {
+                type: 'multiplicativeExpression',
+                children: source.shift()
+            }
+            source.unshift(node)
+            return multiplicativeExpression(source)
+        }
+
+        if(source[0].type === 'multiplicativeExpression' && source.length > 1 && source[1].type === '*') {
+            let node = {
+                type: 'multiplicativeExpression',
+                children: [source.shift(), source.shift(),source.shift()]
+            }
+            source.unshift(node)
+            return multiplicativeExpression(source)
+        }
+
+        if(source[0].type === 'multiplicativeExpression' && source.length > 1 && source[1].type === '/') {
+            let node = {
+                type: 'multiplicativeExpression',
+                children: [source.shift(), source.shift(),source.shift()]
+            }
+            source.unshift(node)
+            return multiplicativeExpression(source)
+        }
+
+        if(source[0].type === "multiplicativeExpression")
+          return source
+    }
+
+    const additiveExpression = (source) => {
+        if(source[0].type === "number") {
+           multiplicativeExpression(source)
+           return additiveExpression(source)
+        }
+
+        if(source[0].type === 'multiplicativeExpression') {
+            let node = {
+                type: 'additiveExpression',
+                children: [source.shift()]
+            }
+            source.unshift(node)
+            return additiveExpression(source)
+        }
+
+        if(source[0].type === 'additiveExpression' && source.length > 1 && source[1].type === '+') {
+            let node = {
+                type: 'additiveExpression',
+                children: [source.shift(), source.shift()]
+            }
+            multiplicativeExpression(source)
+            node.children.push(source.shift())
+            source.unshift(node)
+            return additiveExpression(source)
+        }
+
+        if(source[0].type === 'additiveExpression' && source.length > 1 && source[1].type === '-') {
+            let node = {
+                type: 'additiveExpression',
+                children: [source.shift(), source.shift()]
+            }
+            multiplicativeExpression(source)
+            node.children.push(source.shift())
+            source.unshift(node)
+            return additiveExpression(source)
+        }
+        if(source[0].type === "additiveExpression")
+          return source
+    }
+
+    function expression(source) {
+        if(source[0].type === 'additiveExpression' && source[1].type === 'EOF') {
+            let node = {
+                type: 'Expression',
+                children: [source.shift(), source.shift()]
+            }
+            source.unshift()
+            return node
+        }
+        additiveExpression(source)
+        return expression(source)
+    }
+
+    console.log(expression(source))
+
+  </script>
+</html>

@@ -9,21 +9,18 @@ div {
   justify-content: center;
   height: 200px;
   width: 400px;
+  flex-direction: row-reverse;
 }
 
 div .span1 {
   width: 200px;
+  height: 50px;
+  background-color: rgb(0,255,0);
 }    
 div .span2 { 
     width:100px;
     background-color: rgb(255,0,0);
-    flex: 1;
     height: 20px;
-}
-div span {
-    background-color: rgb(0,255,0);
-    width: 40px
-    height: 30px;
 }
     </style>
 </head>
