@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      .line {
+        display: flex;
+      }
+      .cell {
+        width: 8px;
+        height: 8px;
+        border: 1px solid #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <button id="clear">重置</button>
+    <button id="paint">着色</button>
+    <button id="eraser">橡皮擦</button>
+    <button id="save">保存</button>
+  </body>
+  <script>
+    let isMouseDown = false;
+    let currentColor = "black";
+    const containerEle = document.getElementById("root");
+    const lsKey = "feex:map";
+    const lsData = localStorage.getItem(lsKey);
+    const data = lsData ? JSON.parse(lsData) : new Array(10000).fill(0);
+    const initialRender = () => {
+      const lines = new Array(100).fill(0);
+      const containerFragment = document.createDocumentFragment();
+      document.addEventListener("mousedown", () => {
+        isMouseDown = true;
+      });
+      document.addEventListener("mouseup", () => {
+        isMouseDown = false;
+      });
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const linesEle = document.createElement("div");
+        linesEle.classList = ["line"];
+        const cells = new Array(100).fill(0);
+        for (let j = 0; j < cells.length; j++) {
+          const cellEle = document.createElement("div");
+          cellEle.classList = ["cell"];
+          cellEle.style.background =
+            data[i * 100 + j] === 1 ? "black" : "lightgray";
+          cellEle.addEventListener("mouseover", () => {
+            if (!isMouseDown) return;
+            cellEle.style.background = currentColor;
+            data[i * 100 + j] = currentColor === "black" ? 1 : 0;
+          });
+          linesEle.appendChild(cellEle);
+        }
+        containerFragment.appendChild(linesEle);
+      }
+      containerEle.append(containerFragment);
+    };
+    const clearButtonElement = document.getElementById("clear");
+    clearButtonElement.addEventListener("click", () => {
+      for (let y = 0; y < 100; y++) {
+        const line = containerEle.children[y];
+        for (let x = 0; x < 100; x++) {
+          const cell = line.children[x];
+          if(cell.style.background !== "lightgray") {
+            data[y * 100 + x] = 0  
+            cell.style.background = "lightgray";
+          }
+        }
+      }
+    });
+    const paintButtonElement = document.getElementById("paint");
+    paintButtonElement.addEventListener(
+      "click",
+      () => (currentColor = "black")
+    );
+    const eraserButtonElement = document.getElementById("eraser");
+    eraserButtonElement.addEventListener(
+      "click",
+      () => (currentColor = "lightgray")
+    );
+    const saveButtonElement = document.getElementById("save");
+    saveButtonElement.addEventListener("click", () => {
+      localStorage.setItem(lsKey, JSON.stringify(data));
+    });
+    initialRender();
+  </script>
+  <script src="./navigate.js"></script>
+  <script>
+    // console.log(findPath(data, [0, 0], [50, 50]));
+  </script>
+</html>
