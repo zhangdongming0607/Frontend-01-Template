@@ -49,7 +49,7 @@
 
     let source = [];
 
-    for (let token of tokenize("1024+1222")) {
+    for (let token of tokenize("2/4 + 1")) {
       if (token.type !== "whitespace") {
         source.push(token);
       }
@@ -78,7 +78,7 @@
         if(source[0].type === 'multiplicativeExpression' && source.length > 1 && source[1].type === '/') {
             let node = {
                 type: 'multiplicativeExpression',
-                children: [source.shift(), source.shift(),source.shift()]
+                children: [source.shift(), source.shift(), source.shift()]
             }
             source.unshift(node)
             return multiplicativeExpression(source)
@@ -124,6 +124,7 @@
             source.unshift(node)
             return additiveExpression(source)
         }
+
         if(source[0].type === "additiveExpression")
           return source
     }
