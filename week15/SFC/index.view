@@ -1,0 +1,8 @@
+<template>
+  <p>World world!</p>
+</template>
+
+<script>
+import MyCreate from './component'
+console.log(1312)
+</script>
