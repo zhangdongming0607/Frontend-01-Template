@@ -1,0 +1,17 @@
+{
+  "name": "<%= title %>",
+  "version": "1.0.0",
+  "main": "index.js",
+  "files": [
+    "app",
+    "router"
+  ],
+  "scripts": {
+      "test": "mocha",
+      "coverage": "nyv mocha",
+      "start": "webpack-dev-server",
+      "build": "webpack"
+  },
+  "license": "MIT",
+  "dependencies": {}
+}

@@ -1,0 +1,13 @@
+{
+  "name": "generator-toytool",
+  "version": "1.0.0",
+  "main": "index.js",
+  "files": [
+    "app",
+    "router"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "yeoman-generator": "^4.11.0"
+  }
+}
